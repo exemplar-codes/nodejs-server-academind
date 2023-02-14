@@ -1,4 +1,5 @@
 const http = require("http");
+const fs = require("fs");
 
 const server = http.createServer((req, res) => {
   if (req.url === "/" && req.method === "GET") {
@@ -19,12 +20,11 @@ const server = http.createServer((req, res) => {
     res.end();
     return;
   } else if (req.url === "/message" && req.method === "POST") {
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/html");
-    res.write("<html>");
-    res.write("<head><title>Success</title></head>");
-    res.write("<body><h1>Form submitted!</h1></body");
-    res.write("</html>");
+    fs.writeFileSync("message.txt", "DUMMY_MESSAGE\n", { flag: "a" });
+
+    res.setHeader("Location", "/"); // redirect to
+    res.statusCode = 302; // 302 means redirection. need a 3xx or 201 status for redirection to work
+
     res.end();
     return;
   }
