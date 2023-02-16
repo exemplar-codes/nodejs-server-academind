@@ -20,7 +20,9 @@ const server = http.createServer((req, res) => {
     res.end();
     return;
   } else if (req.url === "/message" && req.method === "POST") {
-    fs.writeFileSync("message.txt", "DUMMY_MESSAGE\n", { flag: "a" });
+    const enteredMessage = "DUMMY_MESSAGE";
+    console.log("enteredMessage", enteredMessage);
+    fs.writeFileSync("message.txt", `${enteredMessage}\n`, { flag: "a" });
 
     res.setHeader("Location", "/"); // redirect to
     res.statusCode = 302; // 302 means redirection. need a 3xx or 201 status for redirection to work
