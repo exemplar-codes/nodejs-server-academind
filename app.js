@@ -9,7 +9,7 @@ const server = http.createServer((req, res) => {
     res.write("<head><title>Home page</title></head>");
     res.write(
       `<body>
-			<form action='/message' method='POST'>
+			<form action='/message' method='GET'>
 				<input type='text' name='message'
 				placeholder='Enter text and press Enter'
 				size="40px" /> <br />
@@ -55,6 +55,7 @@ const server = http.createServer((req, res) => {
     res.end();
     return;
   } else if (req.url === "/message" && req.method === "POST") {
+    // Form data
     const enteredMessageBuffer = [];
     req.on("data", (chunk) => {
       enteredMessageBuffer.push(chunk);
@@ -74,6 +75,7 @@ const server = http.createServer((req, res) => {
     });
     return; // end function to avoid running res ops prematurely, and also res ops after res.end
   } else if (req.url === "/api/message" && req.method === "POST") {
+    // JSON
     const enteredMessageBuffer = [];
     req.on("data", (chunk) => {
       enteredMessageBuffer.push(chunk);
@@ -92,6 +94,22 @@ const server = http.createServer((req, res) => {
 
       res.end();
     });
+    return; // end function to avoid running res ops prematurely, and also res ops after res.end
+  } else if (req.url.includes("/message") && req.method === "GET") {
+    // query params
+    const fullUrl = req.headers.host + req.url;
+    const { searchParams } = new URL(fullUrl);
+    const enteredMessage = searchParams.get("message");
+
+    fs.writeFileSync("message.txt", `${enteredMessage}\n`, {
+      flag: "a",
+      encoding: "utf-8",
+    });
+
+    res.setHeader("Location", "/"); // redirect to
+    res.statusCode = 302; // 302 means redirection. need a 3xx or 201 status for redirection to work
+
+    res.end();
     return; // end function to avoid running res ops prematurely, and also res ops after res.end
   }
 
