@@ -20,15 +20,24 @@ const server = http.createServer((req, res) => {
     res.end();
     return;
   } else if (req.url === "/message" && req.method === "POST") {
-    const enteredMessage = "DUMMY_MESSAGE";
-    console.log("enteredMessage", enteredMessage);
-    fs.writeFileSync("message.txt", `${enteredMessage}\n`, { flag: "a" });
+    const enteredMessageBuffer = [];
+    req.on("data", (chunk) => {
+      enteredMessageBuffer.push(chunk);
+    });
+    req.on("end", () => {
+      const receivedRequestBody = enteredMessageBuffer.toString();
+      const enteredMessage = receivedRequestBody.split("=").at(-1);
+      fs.writeFileSync("message.txt", `${enteredMessage}\n`, {
+        flag: "a",
+        encoding: "utf-8",
+      });
 
-    res.setHeader("Location", "/"); // redirect to
-    res.statusCode = 302; // 302 means redirection. need a 3xx or 201 status for redirection to work
+      res.setHeader("Location", "/"); // redirect to
+      res.statusCode = 302; // 302 means redirection. need a 3xx or 201 status for redirection to work
 
-    res.end();
-    return;
+      res.end();
+    });
+    return; // end function to avoid running res ops prematurely, and also res ops after res.end
   }
 
   res.statusCode = 404;
